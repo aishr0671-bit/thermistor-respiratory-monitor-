@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arduino Nano Respiratory Monitor &mdash; Biomedical Instrumentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}
+:root{
+  --bg:#070d1a;--bg2:#0c1424;--bg3:#111e33;
+  --teal:#2de2c6;--coral:#ff7262;--amber:#f5b942;--blue:#5b9ef4;--purple:#c084fc;
+  --text:#dde6f5;--muted:#7b8faa;--soft:#a8bcd4;--border:rgba(255,255,255,0.07);
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.7;overflow-x:hidden}
+.wrap{max-width:880px;margin:0 auto;padding:0 28px}
+nav{position:sticky;top:0;z-index:100;background:rgba(7,13,26,0.93);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 0}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;max-width:880px;margin:0 auto;padding:0 28px}
+.nav-logo{font-family:'DM Serif Display',serif;font-size:17px;color:var(--teal)}
+.nav-links{display:flex;gap:18px;list-style:none}
+.nav-links a{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--teal)}
+.hero{padding:80px 0 56px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle,rgba(45,226,198,0.06) 0%,transparent 70%);top:-180px;right:-160px;pointer-events:none}
+.eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+.eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:throb 2s ease-in-out infinite}
+@keyframes throb{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.4}}
+.eyebrow-text{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:500}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(34px,6vw,56px);line-height:1.08;margin-bottom:6px}
+.hero h1 em{font-style:normal;color:var(--teal)}
+.hero-quote{border-left:3px solid var(--teal);padding-left:18px;margin:0 0 20px;font-style:italic;color:var(--muted);font-size:14px;line-height:1.7}
+.hero-sub{font-size:15px;color:var(--soft);max-width:540px;margin:0 0 36px;line-height:1.8}
+.chip-row{display:flex;gap:10px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--soft)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:40px 0 64px}
+.stat{background:var(--bg2);padding:20px 14px;text-align:center}
+.stat-n{font-family:'DM Serif Display',serif;font-size:26px;color:var(--teal)}
+.stat-l{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3}
+.sec{padding:56px 0 0}
+.sec-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(45,226,198,0.08);border:1px solid rgba(45,226,198,0.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--teal);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+.sec h2{font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:20px;line-height:1.2}
+.sec p{color:var(--soft);line-height:1.8;margin-bottom:14px}
+.motiv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.motiv-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 18px}
+.motiv-card .ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.ic-teal{background:rgba(45,226,198,0.12)}
+.ic-coral{background:rgba(255,114,98,0.12)}
+.ic-blue{background:rgba(91,158,244,0.12)}
+.motiv-card h4{font-size:13px;font-weight:600;margin-bottom:5px}
+.motiv-card p{font-size:12px;color:var(--muted);line-height:1.6}
+.chain-wrap{margin:24px 0}
+.chain-row{display:flex;align-items:stretch;overflow-x:auto}
+.cnode{flex:1;min-width:95px;background:var(--bg3);border:1px solid var(--border);padding:14px 8px;text-align:center;cursor:pointer;transition:all .22s}
+.cnode:first-child{border-radius:10px 0 0 10px}
+.cnode:last-child{border-radius:0 10px 10px 0}
+.cnode:hover,.cnode.on{background:rgba(45,226,198,0.09);border-color:rgba(45,226,198,0.4)}
+.cnode svg{display:block;margin:0 auto 5px}
+.cnode .cn{font-size:11px;font-weight:600;color:var(--text)}
+.cnode .cv{font-size:9px;color:var(--muted);margin-top:2px}
+.cnode.on .cn{color:var(--teal)}
+.carrow{width:18px;display:flex;align-items:center;justify-content:center;color:rgba(45,226,198,0.3);font-size:16px;flex-shrink:0}
+.chain-info{margin-top:10px;background:var(--bg2);border:1px solid rgba(45,226,198,0.18);border-radius:10px;padding:16px 20px;font-size:13px;color:var(--muted);line-height:1.7;min-height:68px}
+.chain-info strong{color:var(--teal);display:block;margin-bottom:4px}
+.conn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}
+.conn-block{background:var(--bg2);border-radius:12px;padding:20px;border-left:3px solid var(--teal)}
+.conn-block.coral{border-left-color:var(--coral)}
+.conn-block.amber{border-left-color:var(--amber)}
+.conn-block.blue{border-left-color:var(--blue)}
+.conn-block h4{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.conn-step{display:flex;gap:9px;margin-bottom:8px;align-items:flex-start}
+.conn-step:last-child{margin-bottom:0}
+.step-num{width:18px;height:18px;border-radius:50%;background:rgba(45,226,198,0.13);border:1px solid rgba(45,226,198,0.25);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--teal);flex-shrink:0;margin-top:3px}
+.step-warn{width:18px;height:18px;border-radius:50%;background:rgba(255,114,98,0.12);border:1px solid rgba(255,114,98,0.25);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--coral);flex-shrink:0;margin-top:3px}
+.conn-step p{font-size:12px;color:var(--muted);line-height:1.55;margin:0}
+.conn-step p strong{color:var(--soft)}
+.conn-step p .no{color:var(--coral);font-weight:700}
+.pin-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:13px}
+.pin-table th{text-align:left;padding:8px 14px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--teal);font-weight:600;border-bottom:1px solid rgba(45,226,198,0.22)}
+.pin-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted)}
+.pin-table tr:hover td{background:rgba(255,255,255,0.02)}
+.pin-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal);font-weight:700}
+.pin-table td:nth-child(2){color:var(--text);font-weight:500}
+.pbadge{display:inline-block;font-size:10px;border-radius:4px;padding:1px 7px;font-weight:600}
+.pb-a{background:rgba(91,158,244,0.13);color:var(--blue)}
+.pb-d{background:rgba(45,226,198,0.11);color:var(--teal)}
+.pb-p{background:rgba(245,185,66,0.12);color:var(--amber)}
+.pb-g{background:rgba(255,114,98,0.1);color:var(--coral)}
+.pb-x{background:rgba(255,114,98,0.15);color:var(--coral);text-decoration:line-through}
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:13px}
+.comp-table th{text-align:left;padding:8px 14px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--teal);font-weight:600;border-bottom:1px solid rgba(45,226,198,0.22)}
+.comp-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted)}
+.comp-table tr:hover td{background:rgba(255,255,255,0.02)}
+.comp-table td:first-child{color:var(--text);font-weight:500}
+.note-box{border-radius:10px;padding:14px 18px;margin:16px 0;font-size:12px;color:var(--muted);line-height:1.7;display:flex;gap:10px;align-items:flex-start}
+.note-warn{background:rgba(255,114,98,0.05);border:1px solid rgba(255,114,98,0.2)}
+.note-info{background:rgba(245,185,66,0.05);border:1px solid rgba(245,185,66,0.18)}
+.note-box svg{flex-shrink:0;margin-top:2px}
+/* Wire legend */
+.legend-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:16px 0}
+.legend-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:12px}
+.wire-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+.sw-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:16px}
+.sw-tag{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--amber);background:rgba(245,185,66,0.1);border-radius:4px;padding:2px 8px;display:inline-block;margin-bottom:10px}
+.sw-card h4{font-size:13px;font-weight:600;margin-bottom:4px}
+.sw-card p{font-size:11px;color:var(--muted);line-height:1.6}
+.algo-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin:16px 0;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--soft);line-height:2}
+.algo-box .kw{color:var(--teal)}
+.algo-box .fn{color:var(--amber)}
+.algo-box .cm{color:var(--muted);font-style:italic}
+.algo-box .num{color:var(--coral)}
+.perf-list{display:flex;flex-direction:column;gap:12px;margin:20px 0}
+.perf-item{display:flex;align-items:center;gap:14px}
+.perf-lbl{font-size:12px;min-width:180px;color:var(--soft)}
+.perf-bg{flex:1;height:5px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden}
+.perf-fill{height:100%;border-radius:3px;background:var(--teal);width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.perf-num{font-size:12px;color:var(--teal);font-family:'JetBrains Mono',monospace;min-width:72px;text-align:right}
+.conc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+.conc-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px}
+.conc-card h4{font-size:13px;font-weight:600;margin-bottom:10px}
+.conc-card ul{list-style:none;padding:0}
+.conc-card li{font-size:12px;color:var(--muted);padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:flex-start;gap:7px;line-height:1.5}
+.conc-card li:last-child{border-bottom:none}
+.li-dot{width:5px;height:5px;border-radius:50%;margin-top:7px;flex-shrink:0}
+.li-dot.t{background:var(--teal)}
+.li-dot.c{background:var(--coral)}
+.team-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:24px 0}
+.team-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px 12px;text-align:center;transition:all .25s}
+.team-card:hover{border-color:rgba(45,226,198,0.3);transform:translateY(-3px)}
+.avatar{width:54px;height:54px;border-radius:50%;margin:0 auto 13px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:17px;font-weight:700}
+.av1{background:linear-gradient(135deg,#2de2c6,#1ab8a0);color:#000}
+.av2{background:linear-gradient(135deg,#5b9ef4,#3a7fd4);color:#000}
+.av3{background:linear-gradient(135deg,#f5b942,#e09820);color:#000}
+.av4{background:linear-gradient(135deg,#ff7262,#e05040);color:#fff}
+.av5{background:linear-gradient(135deg,#c084fc,#9050d4);color:#fff}
+.tc-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px}
+.tc-roll{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.04em}
+.div-line{height:1px;background:var(--border);margin:48px 0 0}
+footer{padding:28px 0 52px}
+.foot-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.foot-left{font-size:12px;color:var(--muted)}
+.foot-right{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .motiv-grid,.conn-grid,.conc-grid{grid-template-columns:1fr}
+  .sw-grid{grid-template-columns:1fr 1fr}
+  .team-grid{grid-template-columns:repeat(3,1fr)}
+  .legend-grid{grid-template-columns:repeat(3,1fr)}
+  .nav-links{gap:10px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo">Respiratory Monitor</span>
+    <ul class="nav-links">
+      <li><a href="#motivation">Motivation</a></li>
+      <li><a href="#hardware">Hardware</a></li>
+      <li><a href="#software">Software</a></li>
+      <li><a href="#conclusion">Conclusion</a></li>
+      <li><a href="#team">Team</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="eyebrow"><div class="eyebrow-dot"></div><span class="eyebrow-text">Biomedical Instrumentation Project</span></div>
+    <h1>Arduino Nano<br><em>Respiratory</em><br>Monitor</h1>
+    <div class="hero-quote">"A low-cost thermistor-based device that detects patient breathing rate and triggers an alarm when breathing stops."</div>
+    <p class="hero-sub">Breath-induced temperature changes at a thermistor are read via a voltage divider into the Arduino Nano ADC. The system detects apnea in real time and alerts via LED and active buzzer &mdash; all on a single breadboard.</p>
+    <div class="chip-row">
+      <div class="chip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2de2c6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+        Arduino Nano (ATmega328P)
+      </div>
+      <div class="chip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a8bcd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+        10K NTC Thermistor
+      </div>
+      <div class="chip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f5b942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="11" x2="23" y2="13"/></svg>
+        USB / Regulated 5V
+      </div>
+      <div class="chip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ff7262" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        Active Buzzer Alarm
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-n">&lt;10s</div><div class="stat-l">Apnea detection</div></div>
+    <div class="stat"><div class="stat-n">5V</div><div class="stat-l">Operating voltage</div></div>
+    <div class="stat"><div class="stat-n">A0</div><div class="stat-l">Analog input pin</div></div>
+    <div class="stat"><div class="stat-n">4</div><div class="stat-l">Circuit blocks</div></div>
+  </div>
+
+  <!-- MOTIVATION -->
+  <section class="sec" id="motivation">
+    <div class="sec-tag">01 &middot; Motivation</div>
+    <h2>Why We Built This</h2>
+    <p>Respiratory rate is one of the most critical vital signs &mdash; yet it is the most overlooked in low-resource clinical settings. Apnea, the temporary cessation of breathing, can be fatal if undetected for even a few seconds in vulnerable patients such as neonates or post-operative adults.</p>
+    <p>We designed this monitor to be the simplest possible working system: no specialized ICs, no op-amps, no complex firmware &mdash; just a thermistor, a resistor, and an Arduino Nano. The goal was to demonstrate that a clinically meaningful device can be built from components available at any electronics shop.</p>
+    <div class="motiv-grid">
+      <div class="motiv-card">
+        <div class="ic ic-teal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2de2c6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>
+        </div>
+        <h4>Low-Resource Design</h4>
+        <p>Built from off-the-shelf components. No calibration, no soldering, no specialized equipment required.</p>
+      </div>
+      <div class="motiv-card">
+        <div class="ic ic-coral">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff7262" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <h4>Critical Apnea Alert</h4>
+        <p>LED and active buzzer trigger immediately when breathing stops &mdash; fast enough to matter in real clinical scenarios.</p>
+      </div>
+      <div class="motiv-card">
+        <div class="ic ic-blue">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b9ef4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h4>Thermistor Sensing</h4>
+        <p>Exhaled breath warms the thermistor, lowering its resistance and raising the A0 voltage. Each breath = one complete cycle.</p>
+      </div>
+    </div>
+    <div style="padding-top:28px">
+      <h3 style="font-family:'DM Serif Display',serif;font-size:19px;margin-bottom:10px">Working Principle</h3>
+      <p>An NTC (Negative Temperature Coefficient) 10K thermistor is placed near the patient's mouth or nose, inside a mask. When the patient exhales, warm air heats the thermistor &mdash; its resistance drops &mdash; and the voltage at pin A0 rises. During inhalation, the thermistor cools and the voltage falls. The Arduino continuously samples A0, maintains a rolling baseline, and compares each reading to detect a breath event. If no breath is detected within the timeout window, the apnea alarm activates on D3 (LED solid) and D5 (active buzzer).</p>
+    </div>
+  </section>
+
+  <!-- HARDWARE -->
+  <section class="sec" id="hardware">
+    <div class="sec-tag">02 &middot; Hardware Design &amp; Implementation</div>
+    <h2>Circuit &amp; Connections</h2>
+    <p>The circuit has four functional blocks all feeding into the Arduino Nano. Click any stage in the signal chain to see its full description.</p>
+
+    <!-- Signal Chain -->
+    <div class="chain-wrap">
+      <div class="chain-row" id="chain">
+        <div class="cnode on" data-i="0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2de2c6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+          <div class="cn">Thermistor</div><div class="cv">10K NTC</div>
+        </div>
+        <div class="carrow">&#8250;</div>
+        <div class="cnode" data-i="1">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a8bcd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          <div class="cn">Voltage Divider</div><div class="cv">10k&#937; to GND</div>
+        </div>
+        <div class="carrow">&#8250;</div>
+        <div class="cnode" data-i="2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a8bcd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+          <div class="cn">Arduino A0</div><div class="cv">10-bit ADC</div>
+        </div>
+        <div class="carrow">&#8250;</div>
+        <div class="cnode" data-i="3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a8bcd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <div class="cn">Firmware Logic</div><div class="cv">Apnea detect</div>
+        </div>
+        <div class="carrow">&#8250;</div>
+        <div class="cnode" data-i="4">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a8bcd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>
+          <div class="cn">LED D3</div><div class="cv">220&#937; resistor</div>
+        </div>
+        <div class="carrow">&#8250;</div>
+        <div class="cnode" data-i="5">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a8bcd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          <div class="cn">Buzzer D5</div><div class="cv">Active buzzer</div>
+        </div>
+      </div>
+      <div class="chain-info" id="cinfo">
+        <strong>Thermistor &mdash; 10K NTC</strong>
+        An NTC thermistor placed near the patient's mouth or nose. Exhaled warm breath lowers its resistance; cool inhaled air raises it. This resistance change produces a proportional voltage swing at pin A0 via a voltage divider with a fixed 10 k&#937; pull-down resistor to GND.
+      </div>
+    </div>
+
+    <!-- Wire Colour Legend -->
+    <h3 style="font-family:'DM Serif Display',serif;font-size:17px;margin:28px 0 10px">Wire Colour Legend</h3>
+    <div class="legend-grid">
+      <div class="legend-item"><div class="wire-dot" style="background:#e05555"></div><span style="color:var(--soft)">Red &mdash; Power (+5V)</span></div>
+      <div class="legend-item"><div class="wire-dot" style="background:#333"></div><span style="color:var(--soft)">Black &mdash; Ground</span></div>
+      <div class="legend-item"><div class="wire-dot" style="background:#2de2c6"></div><span style="color:var(--soft)">Green &mdash; Analog (A0)</span></div>
+      <div class="legend-item"><div class="wire-dot" style="background:#f5a623"></div><span style="color:var(--soft)">Orange &mdash; LED (D3)</span></div>
+      <div class="legend-item"><div class="wire-dot" style="background:#5b9ef4"></div><span style="color:var(--soft)">Blue &mdash; Buzzer (D5)</span></div>
+    </div>
+
+    <!-- 4 Connection Blocks -->
+    <h3 style="font-family:'DM Serif Display',serif;font-size:19px;margin:20px 0 14px">Wiring Connections</h3>
+    <div class="conn-grid">
+      <div class="conn-block">
+        <h4>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2de2c6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+          <span style="color:var(--teal)">1. Thermistor Voltage Divider</span>
+        </h4>
+        <div class="conn-step"><div class="step-num">1</div><p>Connect one terminal of the <strong>10K NTC thermistor</strong> to <strong>5V</strong>.</p></div>
+        <div class="conn-step"><div class="step-num">2</div><p>Connect the other terminal to <strong>analog pin A0</strong>.</p></div>
+        <div class="conn-step"><div class="step-num">3</div><p>From the same <strong>A0 node</strong>, connect a <strong>10 k&#937; resistor to GND</strong>. This completes the voltage divider.</p></div>
+        <div class="conn-step"><div class="step-num">4</div><p><em style="color:var(--teal)">Optional:</em> Add a <strong>1 &#956;F capacitor between A0 and GND</strong> to reduce ADC noise.</p></div>
+      </div>
+      <div class="conn-block coral">
+        <h4>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff7262" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>
+          <span style="color:var(--coral)">2. LED Indicator (D3)</span>
+        </h4>
+        <div class="conn-step"><div class="step-num">1</div><p>Connect <strong>digital pin D3</strong> to a <strong>220 &#937; resistor</strong>.</p></div>
+        <div class="conn-step"><div class="step-num">2</div><p>Connect the resistor to the <strong>anode (+) &mdash; longer leg</strong> of the LED.</p></div>
+        <div class="conn-step"><div class="step-num">3</div><p>Connect the <strong>cathode (&minus;) &mdash; shorter leg</strong> to <strong>GND</strong>.</p></div>
+        <div class="conn-step"><div class="step-warn">!</div><p>The <strong>longer leg (anode +)</strong> must face towards the resistor / D3 side.</p></div>
+      </div>
+      <div class="conn-block amber">
+        <h4>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f5b942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <span style="color:var(--amber)">3. Active Buzzer (D5)</span>
+        </h4>
+        <div class="conn-step"><div class="step-num">1</div><p>Connect <strong>digital pin D5</strong> to the <strong>positive (+) terminal</strong> of the <strong>active buzzer</strong>.</p></div>
+        <div class="conn-step"><div class="step-num">2</div><p>Connect the <strong>negative (&minus;) terminal</strong> to <strong>GND</strong>.</p></div>
+        <div class="conn-step"><div class="step-warn">!</div><p>Use an <strong>ACTIVE buzzer</strong>. A passive buzzer requires a transistor driver &mdash; do not connect passive directly.</p></div>
+      </div>
+      <div class="conn-block blue">
+        <h4>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5b9ef4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="11" x2="23" y2="13"/></svg>
+          <span style="color:var(--blue)">4. Power Supply</span>
+        </h4>
+        <div class="conn-step"><div class="step-num">1</div><p>Power via <strong>USB cable</strong> from laptop/PC &mdash; <em>or</em> connect a <strong>regulated 5V DC supply to the 5V pin</strong>.</p></div>
+        <div class="conn-step"><div class="step-num">2</div><p>Ensure <strong>all GND points share a common connection</strong>.</p></div>
+        <div class="conn-step"><div class="step-warn">!</div><p><span class="no">DO NOT</span> connect anything to the <strong>Vin pin</strong>. Vin is for 7&ndash;12V only &mdash; leave it unconnected.</p></div>
+      </div>
+    </div>
+
+    <!-- Critical Warning -->
+    <div class="note-box note-warn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff7262" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div>
+        <strong style="color:var(--coral)">Critical Notes &mdash; Read Before Powering</strong><br>
+        Do <strong style="color:var(--coral)">NOT</strong> connect anything to the <strong>Vin pin</strong> &mdash; it is for 7&ndash;12V input only and must be left unconnected in this build.
+        Use <strong>regulated 5V to the 5V pin only</strong>.
+        All GND points must be tied to a <strong>common ground</strong>.
+        If using a passive buzzer, a transistor driver circuit is required &mdash; use an <strong>active buzzer</strong> for direct connection.
+        Place the thermistor <strong>close to the mouth or inside a mask</strong> for reliable breath detection.
+      </div>
+    </div>
+
+    <!-- Pin Map -->
+    <h3 style="font-family:'DM Serif Display',serif;font-size:19px;margin:28px 0 4px">Arduino Nano Pin Map</h3>
+    <table class="pin-table">
+      <thead><tr><th>Pin</th><th>Connected To</th><th>Type</th><th>Direction</th></tr></thead>
+      <tbody>
+        <tr><td>5V</td><td>Thermistor top terminal &mdash; power supply (+5V)</td><td><span class="pbadge pb-p">Power</span></td><td>Supply</td></tr>
+        <tr><td>A0</td><td>Thermistor &mdash; 10k&#937; resistor junction (voltage divider output)</td><td><span class="pbadge pb-a">Analog</span></td><td>Input</td></tr>
+        <tr><td>D3</td><td>LED via 220 &#937; resistor (anode side)</td><td><span class="pbadge pb-d">Digital</span></td><td>Output</td></tr>
+        <tr><td>D5</td><td>Active buzzer positive (+) terminal</td><td><span class="pbadge pb-d">Digital</span></td><td>Output</td></tr>
+        <tr><td>GND</td><td>10k&#937; resistor, LED cathode, buzzer (&minus;), optional capacitor</td><td><span class="pbadge pb-g">Ground</span></td><td>Common</td></tr>
+        <tr><td>Vin</td><td><strong style="color:var(--coral)">NOT CONNECTED &mdash; leave unconnected</strong></td><td><span class="pbadge pb-x">DO NOT USE</span></td><td>&mdash;</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Component List -->
+    <h3 style="font-family:'DM Serif Display',serif;font-size:19px;margin:28px 0 4px">Component List</h3>
+    <table class="comp-table">
+      <thead><tr><th>Component</th><th>Specification</th><th>Function</th></tr></thead>
+      <tbody>
+        <tr><td>Arduino Nano</td><td>ATmega328P, 16 MHz, 5V logic</td><td>Main microcontroller &mdash; ADC, logic, digital I/O</td></tr>
+        <tr><td>NTC Thermistor</td><td>10K NTC (B = 3950)</td><td>Detects breath-induced temperature change at A0</td></tr>
+        <tr><td>Resistor R1</td><td>10 k&#937; &frac14;W</td><td>Voltage divider pull-down &mdash; forms divider with thermistor</td></tr>
+        <tr><td>Resistor R2</td><td>220 &#937; &frac14;W</td><td>LED current limiter on D3 output</td></tr>
+        <tr><td>LED</td><td>Red or Green 5mm</td><td>Breath-by-breath visual indicator &mdash; solid during apnea</td></tr>
+        <tr><td>Active Buzzer</td><td>5V active buzzer</td><td>Audible apnea alarm on D5 &mdash; must be ACTIVE type</td></tr>
+        <tr><td>Capacitor C1 (optional)</td><td>1 &#956;F ceramic or electrolytic</td><td>Noise filter on A0 &mdash; reduces ADC jitter</td></tr>
+        <tr><td>Breadboard</td><td>400 or 830 tie-point</td><td>Component prototyping base</td></tr>
+        <tr><td>Jumper Wires</td><td>Male-Male Dupont</td><td>All interconnections</td></tr>
+        <tr><td>USB Cable</td><td>USB-A to Mini-B</td><td>Power source and programming interface</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- SOFTWARE -->
+  <section class="sec" id="software">
+    <div class="sec-tag">03 &middot; Software Design &amp; Implementation</div>
+    <h2>Firmware Logic</h2>
+    <p>The firmware runs on the Arduino IDE (C/C++) and implements a continuous sampling loop. The ADC reads the thermistor voltage on pin A0 every ~100 ms. A slow exponential moving average tracks the patient's resting baseline. Each new sample is compared to this baseline &mdash; a deviation beyond the threshold is counted as a breath event. If no event occurs within the apnea timeout window, the alarm fires on D3 (LED solid) and D5 (active buzzer).</p>
+
+    <div class="sw-grid">
+      <div class="sw-card"><div class="sw-tag">Loop &middot; Continuous</div><h4>ADC Sampling</h4><p>Reads analog pin A0 every ~100 ms. Maps thermistor voltage to a 0&ndash;1023 integer value for processing.</p></div>
+      <div class="sw-card"><div class="sw-tag">Logic &middot; Per sample</div><h4>Baseline Tracking</h4><p>Exponential moving average (0.98 / 0.02 weighting) tracks the resting temperature baseline across time.</p></div>
+      <div class="sw-card"><div class="sw-tag">Detect &middot; Per cycle</div><h4>Breath Detection</h4><p>A breath is counted when |ADC &minus; baseline| exceeds the threshold. Each detection resets the apnea timer.</p></div>
+      <div class="sw-card"><div class="sw-tag">Output &middot; D3</div><h4>LED Flash</h4><p>D3 pulses HIGH briefly on each breath. Stays solid HIGH during apnea as an additional visual alert.</p></div>
+      <div class="sw-card"><div class="sw-tag">Alarm &middot; D5</div><h4>Active Buzzer</h4><p>D5 goes HIGH during apnea, directly driving the active buzzer without any additional driver circuit.</p></div>
+      <div class="sw-card"><div class="sw-tag">Serial &middot; 9600</div><h4>Debug Output</h4><p>Real-time ADC values and breath count printed to Serial Monitor at 9600 baud for calibration and testing.</p></div>
+    </div>
+
+    <h3 style="font-family:'DM Serif Display',serif;font-size:19px;margin:24px 0 4px">Core Algorithm</h3>
+    <div class="algo-box">
+<span class="cm">// ---- Pin Definitions ----</span><br>
+<span class="kw">const int</span> THERM_PIN  = A0;<br>
+<span class="kw">const int</span> LED_PIN    = <span class="num">3</span>;<br>
+<span class="kw">const int</span> BUZ_PIN    = <span class="num">5</span>;<br>
+<span class="kw">const int</span> THRESHOLD  = <span class="num">15</span>;   <span class="cm">// ADC deviation to count as breath</span><br>
+<span class="kw">const long</span> APNEA_MS  = <span class="num">10000</span>; <span class="cm">// 10 second apnea timeout</span><br><br>
+<span class="kw">float</span> baseline = <span class="num">512.0</span>;<br>
+<span class="kw">unsigned long</span> lastBreath = <span class="num">0</span>;<br><br>
+<span class="kw">void</span> <span class="fn">loop</span>() {<br>
+&nbsp;&nbsp;<span class="kw">int</span> val = <span class="fn">analogRead</span>(THERM_PIN);<br>
+&nbsp;&nbsp;baseline = <span class="num">0.98</span> * baseline + <span class="num">0.02</span> * val;<br><br>
+&nbsp;&nbsp;<span class="kw">if</span> (<span class="fn">abs</span>(val - baseline) &gt; THRESHOLD) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span>(LED_PIN, HIGH);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;lastBreath = <span class="fn">millis</span>();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">delay</span>(<span class="num">80</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span>(LED_PIN, LOW);<br>
+&nbsp;&nbsp;}<br><br>
+&nbsp;&nbsp;<span class="kw">if</span> (<span class="fn">millis</span>() - lastBreath &gt; APNEA_MS) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span>(LED_PIN, HIGH);  <span class="cm">// solid on = apnea</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span>(BUZ_PIN, HIGH);  <span class="cm">// active buzzer ON</span><br>
+&nbsp;&nbsp;} <span class="kw">else</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">digitalWrite</span>(BUZ_PIN, LOW);<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="fn">delay</span>(<span class="num">100</span>);<br>
+}
+    </div>
+
+    <div class="note-box note-info">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f5b942" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div><strong style="color:var(--amber)">Note on Active vs Passive Buzzer &mdash;</strong> Because we use an <strong>active buzzer</strong>, it only needs a HIGH/LOW digital signal on D5 to sound. There is no need for tone() or a transistor driver. If a passive buzzer is substituted, a transistor (e.g. 2N2222) driver stage and a PWM tone() call are required.</div>
+    </div>
+  </section>
+
+  <!-- CONCLUSION -->
+  <section class="sec" id="conclusion">
+    <div class="sec-tag">04 &middot; Conclusion</div>
+    <h2>Results &amp; Reflections</h2>
+    <p>The device successfully detected breathing cycles in bench testing. The LED flashed reliably on each simulated breath, and the buzzer activated after the apnea timeout. Thermistor placement inside a mask gave the clearest signal. The optional 1 &#956;F capacitor visibly reduced ADC jitter on a USB-powered supply.</p>
+
+    <div class="perf-list" id="perf">
+      <div class="perf-item"><span class="perf-lbl">Breath cycle detection</span><div class="perf-bg"><div class="perf-fill" data-w="95"></div></div><span class="perf-num">Functional</span></div>
+      <div class="perf-item"><span class="perf-lbl">Apnea alert latency</span><div class="perf-bg"><div class="perf-fill" data-w="88"></div></div><span class="perf-num">&lt;10 seconds</span></div>
+      <div class="perf-item"><span class="perf-lbl">LED visual feedback</span><div class="perf-bg"><div class="perf-fill" data-w="100"></div></div><span class="perf-num">Implemented</span></div>
+      <div class="perf-item"><span class="perf-lbl">Active buzzer alarm</span><div class="perf-bg"><div class="perf-fill" data-w="100"></div></div><span class="perf-num">Implemented</span></div>
+      <div class="perf-item"><span class="perf-lbl">USB / 5V operation</span><div class="perf-bg"><div class="perf-fill" data-w="100"></div></div><span class="perf-num">Confirmed</span></div>
+    </div>
+
+    <div class="conc-grid">
+      <div class="conc-card">
+        <h4 style="color:var(--teal)">Strengths</h4>
+        <ul>
+          <li><div class="li-dot t"></div>Entire circuit fits on one breadboard &mdash; minimal components</li>
+          <li><div class="li-dot t"></div>No op-amp or signal conditioning needed</li>
+          <li><div class="li-dot t"></div>Active buzzer connects directly to D5 &mdash; no driver required</li>
+          <li><div class="li-dot t"></div>Self-adapting baseline handles different patient temperatures</li>
+          <li><div class="li-dot t"></div>USB powered &mdash; no battery management required</li>
+          <li><div class="li-dot t"></div>Serial monitor output aids calibration and debugging</li>
+        </ul>
+      </div>
+      <div class="conc-card">
+        <h4 style="color:var(--coral)">Future Work</h4>
+        <ul>
+          <li><div class="li-dot c"></div>Add OLED display to show live breaths-per-minute</li>
+          <li><div class="li-dot c"></div>Improve detection with adaptive peak-finding algorithm</li>
+          <li><div class="li-dot c"></div>Add op-amp amplifier stage for weaker thermistor signals</li>
+          <li><div class="li-dot c"></div>Log breath data to SD card for clinical record-keeping</li>
+          <li><div class="li-dot c"></div>Replace USB with battery + 5V regulator for portability</li>
+          <li><div class="li-dot c"></div>Validate against a reference spirometer or capnograph</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-top:16px">
+      <h4 style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--amber)">Standards &amp; Ethics</h4>
+      <p style="font-size:12px;color:var(--muted);line-height:1.7;margin:0">This project was conducted in adherence to the <strong style="color:var(--soft)">IEEE Code of Ethics</strong>. Results are reported accurately, limitations are disclosed honestly, and the device is presented as a prototype requiring clinical validation before any medical application. The thermistor mask interface is non-invasive and poses no patient risk in its current form.</p>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="sec" id="team">
+    <div class="sec-tag">05 &middot; Our Team</div>
+    <h2>Meet the Engineers</h2>
+    <p>SRM Institute of Science and Technology &middot; Biomedical Instrumentation</p>
+    <div class="team-grid">
+      <div class="team-card"><div class="avatar av1">MA</div><div class="tc-name">Manisha</div><div class="tc-roll">RA2411013010071</div></div>
+      <div class="team-card"><div class="avatar av2">IS</div><div class="tc-name">Ishwarya</div><div class="tc-roll">RA2411013010067</div></div>
+      <div class="team-card"><div class="avatar av3">VA</div><div class="tc-name">Varshitha</div><div class="tc-roll">RA2411013010070</div></div>
+      <div class="team-card"><div class="avatar av4">IF</div><div class="tc-name">Ishal Fatima</div><div class="tc-roll">RA2411013010069</div></div>
+      <div class="team-card"><div class="avatar av5">AY</div><div class="tc-name">Ayesha</div><div class="tc-roll">RA2411013010068</div></div>
+    </div>
+  </section>
+
+  <div class="div-line"></div>
+  <footer>
+    <div class="foot-inner">
+      <span class="foot-left">Arduino Nano Respiratory Monitor &middot; SRM Institute of Science and Technology</span>
+      <span class="foot-right">Biomedical Instrumentation Project</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+var chainData=[
+  {t:"Thermistor &mdash; 10K NTC",d:"An NTC thermistor placed near the patient's mouth or nose, ideally inside a mask. Warm exhaled breath lowers its resistance; cool inhaled air raises it. This produces a cyclic voltage swing at the A0 divider junction &mdash; one full cycle per breath."},
+  {t:"Voltage Divider &mdash; 10k&#937; to GND",d:"A fixed 10 k&#937; resistor connects the thermistor&ndash;A0 junction to GND, forming a classic resistive voltage divider with the thermistor. As thermistor resistance varies with breath temperature, V(A0) rises and falls. An optional 1 &#956;F capacitor across A0&ndash;GND filters high-frequency ADC noise."},
+  {t:"Arduino A0 &mdash; 10-bit ADC",d:"The ATmega328P's built-in 10-bit ADC samples A0 every ~100 ms, producing values 0&ndash;1023. At rest, the reading sits near the mid-point. Exhaled breath pushes it higher; inhalation pulls it lower. The reference voltage is the 5V supply rail."},
+  {t:"Firmware Logic &mdash; Apnea Detection",d:"A slow exponential moving average (0.98/0.02) maintains the patient's resting baseline. Each new sample is compared: if |sample &minus; baseline| exceeds THRESHOLD (default 15 counts), a breath is detected and the apnea timer resets. If the timer exceeds 10 seconds, the alarm fires."},
+  {t:"LED Indicator &mdash; Digital Pin D3",d:"D3 drives an LED through a 220 &#937; current-limiting resistor. The anode (+, longer leg) faces D3; the cathode (&minus;, shorter leg) goes to GND. D3 pulses briefly on each breath. During apnea, D3 stays solid HIGH as an additional visual alert."},
+  {t:"Active Buzzer &mdash; Digital Pin D5",d:"An active buzzer connects directly: D5 to (+), GND to (&minus;). When D5 goes HIGH, the buzzer sounds immediately &mdash; no tone() call or transistor driver required. This is why an ACTIVE buzzer must be used. The buzzer sounds only during apnea events."}
+];
+document.querySelectorAll('.cnode').forEach(function(n){
+  n.addEventListener('click',function(){
+    document.querySelectorAll('.cnode').forEach(function(x){x.classList.remove('on');});
+    n.classList.add('on');
+    var d=chainData[parseInt(n.getAttribute('data-i'))];
+    document.getElementById('cinfo').innerHTML='<strong>'+d.t+'</strong>'+d.d;
+  });
+});
+window.addEventListener('load',function(){
+  setTimeout(function(){
+    document.querySelectorAll('.perf-fill').forEach(function(b){
+      b.style.width=b.getAttribute('data-w')+'%';
+    });
+  },400);
+});
+</script>
+</body>
+</html>
